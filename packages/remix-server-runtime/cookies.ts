@@ -65,6 +65,13 @@ export interface Cookie {
    * header.
    */
   serialize(value: any, options?: CookieSerializeOptions): Promise<string>;
+  
+  /**
+   * Returns a string that will tell the client to delete the cookie.
+   * @example
+   *   return redirect('/done', { headers: { `Set-Cookie`: cookie.destroy() } });
+   */
+  destroy(): Promise<string>;
 }
 
 export type CreateCookieFunction = (
@@ -126,6 +133,17 @@ export const createCookieFactory =
           }
         );
       },
+      destroy() {
+        return serialize(
+          name,
+          "",
+          {
+            ...options,
+            maxAge: 0,
+            expires: new Date(0),
+          }
+        );
+      },
     };
   };
 
@@ -142,7 +160,8 @@ export const isCookie: IsCookieFunction = (object): object is Cookie => {
     typeof object.name === "string" &&
     typeof object.isSigned === "boolean" &&
     typeof object.parse === "function" &&
-    typeof object.serialize === "function"
+    typeof object.serialize === "function" &&
+    typeof object.destroy === "function"
   );
 };
 
